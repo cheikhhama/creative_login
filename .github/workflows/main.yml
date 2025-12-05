@@ -1,0 +1,56 @@
+name: Deploy Django to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. إعداد Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+     
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4.  staticfiles
+      - name: Collect Static Files
+        run: |
+          python manage.py collectstatic --noinput
+
+      # 5. 
+      - name: Deploy Django App
+        uses: SamKirkland/FTP-Deploy-Action@4.5.0
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./         
+          server-dir: /home/${{ secrets.FTP_USERNAME }}/django_app
+          exclude: |
+            **/_pycache_
+            */.pyc
+            node_modules/
+
+      # 6. 
+      - name: Deploy Static Files
+        uses: SamKirkland/FTP-Deploy-Action@4.5.0
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./static/      
+          server-dir: /public_html/static
