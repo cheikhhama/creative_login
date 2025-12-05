@@ -47,7 +47,7 @@ jobs:
 
       
       - name: Deploy Static Files
-        uses: SamKirkland/FTP-Deploy-Action@4
+        uses: samkirkland/ftp-deploy-action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
