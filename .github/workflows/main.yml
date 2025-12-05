@@ -33,7 +33,7 @@ jobs:
 
       # 5. 
       - name: Deploy Django App
-        uses: SamKirkland/FTP-Deploy-Action@4.5.0
+        uses: samkirkland/ftp-deploy-action@v4.3.4
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
