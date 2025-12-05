@@ -1,114 +1,296 @@
-<!-- base.html -->
-{% load static %}
 <!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}CoinPattern Auth{% endblock %}</title>
+  <title>CoinPattern Auth</title>
   <style>
     :root {
-      --primary: #4361ee;
-      --primary-light: #5e7aff;
+      --primary: #667eea;
+      --primary-dark: #764ba2;
       --dark: #1e293b;
       --gray: #64748b;
       --light: #f8fafc;
       --border: #e2e8f0;
       --success: #10b981;
     }
-    * { box-sizing: border-box; }
-    body {
+    
+    * { 
+      box-sizing: border-box;
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f1f5f9;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #334155;
       line-height: 1.6;
+      min-height: 100vh;
     }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+    
+    .container { 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 0 1rem; 
+    }
+    
     header {
-      background: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      position: sticky; top: 0; z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      position: sticky; 
+      top: 0; 
+      z-index: 100;
+      backdrop-filter: blur(10px);
     }
+    
     .navbar {
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
       padding: 1rem 0;
     }
+    
     .brand {
-      font-size: 1.5rem; font-weight: 700; color: var(--primary);
+      font-size: 1.5rem; 
+      font-weight: 700; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
+    
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
     .nav-links a {
-      margin-left: 1.5rem; color: var(--gray); text-decoration: none; font-weight: 500;
+      color: var(--gray); 
+      text-decoration: none; 
+      font-weight: 500;
+      transition: color 0.3s ease;
     }
-    .nav-links a:hover { color: var(--primary); }
-    main { padding: 3rem 0; min-height: 80vh; }
+    
+    .nav-links a:hover { 
+      color: var(--primary); 
+    }
+    
+    .nav-links span {
+      color: var(--dark);
+      font-weight: 600;
+    }
+    
+    main { 
+      padding: 3rem 0; 
+      min-height: 80vh; 
+    }
+    
     footer {
-      text-align: center; padding: 2rem 0; color: #94a3b8; font-size: 0.9rem;
-      border-top: 1px solid var(--border); margin-top: 4rem;
+      text-align: center; 
+      padding: 2rem 0; 
+      color: rgba(255, 255, 255, 0.8); 
+      font-size: 0.9rem;
+      margin-top: 4rem;
     }
 
     .card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
     }
-    .card h1, .card h2 { color: var(--dark); margin-top: 0; }
+    
+    .card h1, .card h2 { 
+      color: var(--dark); 
+      margin-top: 0; 
+      margin-bottom: 1rem;
+    }
 
     .coins-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      gap: 1rem;
-      margin: 2rem 0;
+      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+      gap: 0.6rem;
+      margin: 1.5rem 0;
     }
+    
     .coin {
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg, #f0f0f0, #ffffff);
-      border: 3px solid #cbd5e1;
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: bold; font-size: 1.1rem;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-weight: 700; 
+      font-size: 0.85rem;
+      color: #78350f;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       user-select: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
+    
     .coin:hover {
-      transform: translateY(-4px);
-      border-color: var(--primary);
-      box-shadow: 0 10px 20px rgba(67,97,238,0.2);
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
-    .coin:active { transform: scale(0.95); }
+    
+    .coin:active { 
+      transform: translateY(-2px) scale(1.02); 
+    }
 
     #pattern-display {
-      display: flex; flex-wrap: wrap; gap: 12px; min-height: 100px;
-      padding: 1.5rem; background: #f8fafc; border-radius: 10px; margin: 1.5rem 0;
-      border: 2px dashed #cbd5e1;
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 0.5rem; 
+      justify-content: center;
+      min-height: 80px;
+      padding: 1.5rem; 
+      background: #f9fafb; 
+      border-radius: 10px; 
+      margin: 1.5rem 0;
     }
+    
+    #pattern-display .coin {
+      width: 40px;
+      height: 40px;
+      font-size: 0.75rem;
+    }
+    
     #pattern-display:empty::before {
-      content: "Votre motif apparaîtra ici..."; color: #94a3b8; font-style: italic;
+      content: "Votre motif apparaîtra ici..."; 
+      color: #94a3b8; 
+      font-style: italic;
+      display: flex;
+      align-items: center;
     }
 
     .btn {
-      padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600;
-      cursor: pointer; text-decoration: none; display: inline-block; text-align: center;
-      transition: all 0.2s;
+      padding: 1rem 2rem; 
+      border: none; 
+      border-radius: 50px; 
+      font-weight: 600;
+      cursor: pointer; 
+      text-decoration: none; 
+      display: inline-block; 
+      text-align: center;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px); }
-    .btn-success { background: var(--success); color: white; }
-    .btn-success:hover { background: #0d9c6b; }
-    .btn-lg { padding: 1rem 2rem; font-size: 1.1rem; }
+    
+    .btn-primary { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: white; 
+    }
+    
+    .btn-primary:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-success { 
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
+      color: white; 
+    }
+    
+    .btn-success:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-lg { 
+      padding: 1rem 2rem; 
+      font-size: 1.1rem; 
+    }
 
     .form-control {
-      width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;
-      font-size: 1rem; margin-bottom: 1rem;
+      width: 100%; 
+      padding: 1rem; 
+      border: 2px solid var(--border); 
+      border-radius: 10px;
+      font-size: 1rem; 
+      margin-bottom: 1rem;
+      background: white;
+      transition: all 0.3s ease;
     }
-    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67,97,238,0.2); }
+    
+    .form-control:focus { 
+      outline: none; 
+      border-color: var(--primary); 
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); 
+    }
 
-    @media (max-width: 640px) {
-      .coins-grid { grid-template-columns: repeat(4, 1fr); }
-      .coin { width: 70px; height: 70px; font-size: 1rem; }
+    .text-center {
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      .coins-grid { 
+        grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+        gap: 0.5rem;
+      }
+      
+      .coin { 
+        font-size: 0.8rem;
+      }
+
+      #pattern-display .coin {
+        width: 38px;
+        height: 38px;
+        font-size: 0.7rem;
+      }
+
+      .card {
+        padding: 1.5rem;
+      }
+
+      main {
+        padding: 2rem 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .brand {
+        font-size: 1.25rem;
+      }
+
+      .coins-grid { 
+        grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+        gap: 0.4rem;
+      }
+      
+      .coin { 
+        font-size: 0.75rem;
+      }
+
+      #pattern-display .coin {
+        width: 35px;
+        height: 35px;
+        font-size: 0.65rem;
+      }
+
+      .card {
+        padding: 1.25rem;
+      }
+
+      .btn {
+        padding: 0.875rem 1.5rem;
+      }
     }
     
   </style>
@@ -117,27 +299,77 @@
 
 <header>
   <div class="container navbar">
-    <div class="brand">TockenCoin</div>
+    <div class="brand">🪙 TockenCoin</div>
     <div class="nav-links">
-      {% if request.session.username %}
-        <span>Bonjour, {{ request.session.username }} !</span>
-        <a href="{% url 'dashboard' %}">Tableau de bord</a>
-        <a href="{% url 'logout' %}">Déconnexion</a>
-      {% else %}
-        <a href="{% url 'login' %}">Connexion</a>
-        <a href="{% url 'signup' %}">Inscription</a>
-      {% endif %}
+      <!-- When user is logged in -->
+      <span id="user-greeting" style="display: none;">Bonjour, <span id="username-display"></span> !</span>
+      <a href="/dashboard" id="nav-dashboard" style="display: none;">Tableau de bord</a>
+      <a href="/logout" id="nav-logout" style="display: none;">Déconnexion</a>
+      
+      <!-- When user is not logged in -->
+      <a href="/login" id="nav-login">Connexion</a>
+      <a href="/signup" id="nav-signup">Inscription</a>
     </div>
   </div>
 </header>
+
 <main class="container">
-  {% block content %}{% endblock %}
+  <!-- Page content goes here -->
+  <div class="card text-center">
+    <h1>Bienvenue sur TockenCoin</h1>
+    <p class="lead">Une façon belle et visuelle de se connecter — sans mot de passe.</p>
+    <p>Choisissez des pièces pour créer un motif de 1 à 1 000 000. Seul vous connaissez la séquence et le total.</p>
+    
+    <div style="margin: 2rem 0;">
+      <a href="/signup" class="btn btn-success btn-lg">Créer un compte</a>
+      <a href="/login" class="btn btn-primary btn-lg" style="margin-left: 1rem;">Se connecter</a>
+    </div>
+  </div>
 </main>
 
 <footer>
-  © 2025 TockenCoin    Challenge DEFIE
+  <div class="container">
+    © 2025 TockenCoin • Challenge DEFIE
+  </div>
 </footer>
 
-{% block scripts %}{% endblock %}
+<script>
+  // Simulated user session - in Django, this would come from the backend
+  const userSession = {
+    isAuthenticated: false,
+    username: "JohnDoe"
+  };
+
+  // Update navigation based on authentication status
+  function updateNavigation() {
+    const greeting = document.getElementById('user-greeting');
+    const usernameDisplay = document.getElementById('username-display');
+    const navDashboard = document.getElementById('nav-dashboard');
+    const navLogout = document.getElementById('nav-logout');
+    const navLogin = document.getElementById('nav-login');
+    const navSignup = document.getElementById('nav-signup');
+
+    if (userSession.isAuthenticated) {
+      // Show authenticated navigation
+      greeting.style.display = 'inline';
+      usernameDisplay.textContent = userSession.username;
+      navDashboard.style.display = 'inline';
+      navLogout.style.display = 'inline';
+      navLogin.style.display = 'none';
+      navSignup.style.display = 'none';
+    } else {
+      // Show guest navigation
+      greeting.style.display = 'none';
+      navDashboard.style.display = 'none';
+      navLogout.style.display = 'none';
+      navLogin.style.display = 'inline';
+      navSignup.style.display = 'inline';
+    }
+  }
+
+  // Initialize navigation
+  updateNavigation();
+</script>
+
 </body>
 </html>

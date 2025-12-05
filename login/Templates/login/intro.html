@@ -1,26 +1,209 @@
-<!-- intro.html -->
-{% extends 'login/base.html' %}
-{% block title %}Bienvenue - CoinPattern Auth{% endblock %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue - CoinPattern Auth</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-{% block content %}
-<div class="card text-center">
-  <h1>Authentification CoinPattern</h1>
-  <p class="lead">Une façon belle et visuelle de se connecter — sans mot de passe.</p>
-  <p>Choisissez des pièces pour créer un motif de 1 à 1 000 000. Seul vous connaissez la séquence et le total.</p>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
 
-  <div style="margin: 2rem 0;">
-    {% if user.is_authenticated %}
-      <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Aller au tableau de bord</a>
-    {% else %}
-      <a href="{% url 'signup' %}" class="btn btn-success btn-lg">Créer un compte</a>
-      <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Se connecter</a>
-    {% endif %}
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      color: #333;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    .lead {
+      font-size: 1.25rem;
+      color: #555;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(-1px);
+    }
+
+    hr {
+      border: none;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ddd, transparent);
+      margin: 3rem 0;
+    }
+
+    h2 {
+      color: #333;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .challenge-text {
+      font-size: 1rem;
+      color: #666;
+      line-height: 1.8;
+    }
+
+    .coin-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .lead {
+        font-size: 1.1rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+      }
+
+      .btn-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .lead {
+        font-size: 1rem;
+      }
+
+      .coin-icon {
+        font-size: 2.5rem;
+      }
+
+      h2 {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="coin-icon">🪙</div>
+      <h1>Authentification CoinPattern</h1>
+      <p class="lead">Une façon belle et visuelle de se connecter — sans mot de passe.</p>
+      <p>Choisissez des pièces pour créer un motif de 1 à 1 000 000. Seul vous connaissez la séquence et le total.</p>
+
+      <div class="btn-group">
+        <!-- Change these href values to match your actual URLs -->
+        <a href="/signup" class="btn btn-success">Créer un compte</a>
+        <a href="/login" class="btn btn-primary">Se connecter</a>
+      </div>
+
+      <hr>
+
+      <h2>Le défi : Sésame ouvre-toi !</h2>
+      <p class="challenge-text">
+        Système d'authentification visuelle inspiré du défi MECI.<br>
+        Créé pour la compétition DEFIE — 100 % original, sécurisé et élégant.
+      </p>
+    </div>
   </div>
-
-  <hr style="margin: 3rem 0;">
-
-  <h2>Le défi : Sésame ouvre-toi !</h2>
-  <p>Système d’authentification visuelle inspiré du défi MECI.<br>
-  Créé pour la compétition DEFIE — 100 % original, sécurisé et élégant.</p>
-</div>
-{% endblock %}
+</body>
+</html>
