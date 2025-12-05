@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .models import UserProfile
 
 # Coin denominations (statistical, frontend only)
@@ -50,25 +51,47 @@ def login_view(request):
             error = "Pattern incorrect."
 
     return render(request, "login/login.html", {"error": error, "denoms": DENOMS})
-
-
-
-def dashboard_view(request):
+def edit_pattern_view(request):
     username = request.session.get("username")
-
     if not username:
-        return render(request, "dashboard.html", {"is_logged": False})
+        return redirect("login")
 
     user = UserProfile.objects.get(username=username)
-    return render(request, "login/dashboard.html", {"is_logged": True, "user": user})
+
+    if request.method == "POST":
+        pattern_raw = request.POST.get("pattern", "")
+        pattern_list = [int(x) for x in pattern_raw.split(',') if x.isdigit()]
+        total = sum(pattern_list)
+
+        user.pattern = pattern_raw
+        user.total = total
+        user.save()
+
+        return redirect("dashboard")
+
+    return render(request, "login/edit.html", {
+        "user": user,
+        "denoms": DENOMS
+    })
+def dashboard_view(request):
+    username = request.session.get("username") 
+
+    if not username:
+        return redirect("login")  
+
+    try:
+        user = UserProfile.objects.get(username=username)
+        user.pattern_list = [int(x) for x in user.pattern.split(",") if x.isdigit()]
+    except UserProfile.DoesNotExist:
+        request.session.pop("username", None)
+        return redirect("login")
+
+    return render(request, "login/dashboard.html", {"user": user})
 
 
-# ------------------------------------------------------------
-# LOGOUT
-# ------------------------------------------------------------
 def logout_view(request):
     request.session.flush()
-    return redirect("login:login")
+    return redirect("login")
 
 
 def intro_view(request):

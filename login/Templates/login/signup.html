@@ -1,22 +1,24 @@
+<!-- signup.html -->
 {% extends 'login/base.html' %}
-{% block title %}Sign Up - CoinPattern{% endblock %}
+{% block title %}Inscription - CoinPattern{% endblock %}
 
 {% block content %}
 <div class="card">
-  <h2>Create Your Account</h2>
+  <h2>Créer votre compte</h2>
 
-  <form method="post">
+  <form method="post" id="signup-form">
     {% csrf_token %}
-    <input type="text" name="username" placeholder="Username" class="form-control" required>
+    <input type="text" name="username" placeholder="Nom d'utilisateur" class="form-control" required>
     <select name="currency" class="form-control">
       <option value="USD">USD ($)</option>
-      <option value="EUR">EUR (€)</option>
+      <option value="EUR">EUR (euro)</option>
       <option value="MRU">MRU (UM)</option>
       <option value="XOF">XOF (CFA)</option>
     </select>
 
-    <h3 style="margin-top: 2rem;">Build Your Secret Pattern</h3>
-    <p>Click coins in the exact order you want to remember.</p>
+    <h3 style="margin-top: 2rem;">Créez votre motif secret</h3>
+    <p>Cliquez sur les pièces dans l’ordre exact que vous souhaitez mémoriser.<br>
+       <strong style="color:#dc2626;">Minimum 4 pièces • Maximum 10 pièces</strong></p>
 
     <div class="coins-grid">
       {% for coin in denoms %}
@@ -25,52 +27,103 @@
     </div>
 
     <div class="card">
-      <h4>Your Pattern</h4>
+      <h4>Votre motif (<span id="coin-count">0</span>/10)</h4>
       <div id="pattern-display"></div>
       <p style="font-size: 1.5rem; font-weight: bold;">
-        Total: <span id="pattern-total">0</span> <span id="currency-display">MRU</span>
+        Total : <span id="pattern-total">0</span> <span id="currency-display">MRU</span>
       </p>
+      
+      <!-- Feedback message -->
+      <p id="feedback" style="color:#dc2626; font-weight:500; min-height:1.4em; margin-top:0.5rem;"></p>
     </div>
 
     <input type="hidden" name="pattern" id="input-pattern">
     <input type="hidden" name="total" id="input-total">
 
-    <button type="submit" class="btn btn-success btn-lg">Create Account</button>
+    <button type="submit" class="btn btn-success btn-lg" style="width:100%;">Créer le compte</button>
   </form>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // Same JS as login.html but with currency sync
-  const script = document.createElement('script');
-  script.text = document.querySelector('#login-form ~ script')?.text || `
-    const coins = document.querySelectorAll('.coin');
-    const display = document.getElementById('pattern-display');
-    const totalEl = document.getElementById('pattern-total');
-    const inputPattern = document.getElementById('input-pattern');
-    const inputTotal = document.getElementById('input-total');
-    const currencyEl = document.getElementById('currency-display');
-    let pattern = [];
+  const coins = document.querySelectorAll('.coin');
+  const display = document.getElementById('pattern-display');
+  const totalEl = document.getElementById('pattern-total');
+  const countEl = document.getElementById('coin-count');
+  const feedbackEl = document.getElementById('feedback');
+  const inputPattern = document.getElementById('input-pattern');
+  const inputTotal = document.getElementById('input-total');
+  const currencyEl = document.getElementById('currency-display');
+  const form = document.getElementById('signup-form');
 
-    document.querySelector('[name="currency"]').addEventListener('change', (e) => {
-      currencyEl.textContent = e.target.value;
-    });
+  const MIN_COINS = 4;   // change to 3 if you really want
+  const MAX_COINS = 10;
 
-    coins.forEach(coin => {
-      coin.addEventListener('click', () => {
-        const value = parseInt(coin.dataset.value);
-        pattern.push(value);
-        const clone = coin.cloneNode(true);
-        clone.style.width = clone.style.height = '60px';
-        display.appendChild(clone);
-        const total = pattern.reduce((a,b)=>a+b,0);
-        totalEl.textContent = total;
-        inputPattern.value = pattern.join(',');
-        inputTotal.value = total;
+  let pattern = [];
+
+  function updatePattern() {
+    const total = pattern.reduce((a, b) => a + b, 0);
+    const count = pattern.length;
+
+    totalEl.textContent = total;
+    countEl.textContent = count;
+    inputPattern.value = pattern.join(',');
+    inputTotal.value = total;
+
+    // Feedback
+    if (count < MIN_COINS) {
+      feedbackEl.textContent = `Ajoutez encore au moins ${MIN_COINS - count} pièce(s)`;
+    } else if (count > MAX_COINS) {
+      feedbackEl.textContent = `Trop de pièces ! Maximum ${MAX_COINS}`;
+    } else {
+      feedbackEl.textContent = "Motif parfait – vous pouvez valider !";
+      feedbackEl.style.color = "#10b981";
+    }
+  }
+
+  // Currency sync
+  document.querySelector('[name="currency"]').addEventListener('change', (e) => {
+    currencyEl.textContent = e.target.value;
+  });
+
+  coins.forEach(coin => {
+    coin.addEventListener('click', () => {
+      if (pattern.length >= MAX_COINS) {
+        feedbackEl.textContent = `Maximum ${MAX_COINS} pièces autorisées`;
+        feedbackEl.style.color = "#dc2626";
+        return;
+      }
+
+      const value = parseInt(coin.dataset.value);
+      pattern.push(value);
+
+      const clone = coin.cloneNode(true);
+      clone.style.width = clone.style.height = '60px';
+      clone.style.fontSize = '0.9rem';
+      clone.style.cursor = 'pointer';
+
+      clone.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const index = Array.from(display.children).indexOf(this);
+        if (index > -1) {
+          pattern.splice(index, 1);
+          this.remove();
+          updatePattern();
+        }
       });
+
+      display.appendChild(clone);
+      updatePattern();
     });
-  `;
-  document.body.appendChild(script);
+  });
+
+  // Prevent submission if rules not respected
+  form.addEventListener('submit', (e) => {
+    if (pattern.length < MIN_COINS || pattern.length > MAX_COINS) {
+      e.preventDefault();
+      alert(`Votre motif doit contenir entre ${MIN_COINS} et ${MAX_COINS} pièces.`);
+    }
+  });
 </script>
 {% endblock %}

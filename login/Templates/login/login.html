@@ -1,9 +1,10 @@
+<!-- login.html -->
 {% extends 'login/base.html' %}
-{% block title %}Login - CoinPattern{% endblock %}
+{% block title %}Connexion - CoinPattern{% endblock %}
 
 {% block content %}
 <div class="card">
-  <h2>Login with Your Coin Pattern</h2>
+  <h2>Connectez-vous avec votre motif de pièces</h2>
 
   {% if error %}
     <p style="color: #ef4444; font-weight: 500;">{{ error }}</p>
@@ -16,10 +17,10 @@
   </div>
 
   <div class="card">
-    <h4>Your Pattern</h4>
+    <h4>Votre motif</h4>
     <div id="pattern-display"></div>
     <p style="margin: 1rem 0; font-size: 1.5rem; font-weight: bold;">
-      Total: <span id="pattern-total">0</span> <small id="currency-display">MRU</small>
+      Total : <span id="pattern-total">0</span> <small id="currency-display">MRU</small>
     </p>
   </div>
 
@@ -27,7 +28,7 @@
     {% csrf_token %}
     <input type="hidden" name="pattern" id="input-pattern">
     <input type="hidden" name="total" id="input-total">
-    <button type="submit" class="btn btn-primary btn-lg">Login</button>
+    <button type="submit" class="btn btn-primary btn-lg">Se connecter</button>
   </form>
 </div>
 {% endblock %}
@@ -42,20 +43,38 @@
 
   let pattern = [];
 
+  // Function to update total and hidden inputs
+  function updatePattern() {
+    const total = pattern.reduce((a, b) => a + b, 0);
+    totalEl.textContent = total;
+    inputPattern.value = pattern.join(',');
+    inputTotal.value = total;
+  }
+
   coins.forEach(coin => {
     coin.addEventListener('click', () => {
       const value = parseInt(coin.dataset.value);
+
+      // Add coin
       pattern.push(value);
 
       const clone = coin.cloneNode(true);
-      clone.style.width = '60px'; clone.style.height = '60px';
+      clone.style.width = '60px';
+      clone.style.height = '60px';
       clone.style.fontSize = '0.9rem';
-      display.appendChild(clone);
+      clone.style.cursor = 'pointer';
 
-      const total = pattern.reduce((a,b) => a + b, 0);
-      totalEl.textContent = total;
-      inputPattern.value = pattern.join(',');
-      inputTotal.value = total;
+      // Click on clone removes it
+      clone.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const index = Array.from(display.children).indexOf(this);
+        pattern.splice(index, 1);
+        this.remove();
+        updatePattern();
+      });
+
+      display.appendChild(clone);
+      updatePattern();
     });
   });
 </script>

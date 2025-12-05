@@ -1,30 +1,38 @@
 {% extends 'login/base.html' %}
-{% block title %}Dashboard - {{ user.username }}{% endblock %}
+{% block title %}Tableau de bord - {{ user.username }}{% endblock %}
 
 {% block content %}
 <div class="card text-center">
-  {% if user.is_authenticated %}
-    <h1>Welcome back, {{ user.username }}!</h1>
-    <p>Your account is protected by your unique coin pattern.</p>
+  {% if user %}
+    <h1>Bonjour à nouveau, {{ user.username }} !</h1>
+    <p>Votre compte est protégé par votre motif de pièces unique.</p>
 
-    <h3>Your Saved Pattern</h3>
+    <h3>Votre motif enregistré</h3>
     <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:15px;margin:2rem 0;">
       {% for coin in user.pattern_list %}
         <div class="coin" style="width:90px;height:90px;font-size:1.3rem;">{{ coin }}</div>
       {% empty %}
-        <p>No pattern saved</p>
+        <p>Aucun motif enregistré</p>
       {% endfor %}
     </div>
 
     <p style="font-size:1.8rem;font-weight:bold;">
-      Total: {{ user.total }} {{ user.currency }}
+      Total : {{ user.total }} {{ user.currency }}
     </p>
 
-    <a href="{% url 'logout' %}" class="btn btn-primary btn-lg">Logout</a>
+    <div style="margin: 2rem 0; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a href="{% url 'edit_pattern' %}" class="btn btn-success btn-lg">
+        Éditer mon motif
+      </a>
+      <a href="{% url 'logout' %}" class="btn btn-primary btn-lg">
+        Se déconnecter
+      </a>
+    </div>
+
   {% else %}
-    <h1>Not Logged In</h1>
-    <p>You need to log in with your coin pattern.</p>
-    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login</a>
+    <h1>Non connecté</h1>
+    <p>Vous devez vous connecter avec votre motif de pièces.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Connexion</a>
   {% endif %}
 </div>
 {% endblock %}

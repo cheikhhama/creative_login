@@ -1,0 +1,107 @@
+{% extends 'login/base.html' %}
+{% block title %}Modifier mon motif - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2 class="text-center">Modifier votre motif secret</h2>
+  <p class="text-center">Cliquez sur les pièces (vous pouvez supprimer en recliquant dessus)</p>
+
+  <form method="post" action="{% url 'edit_pattern' %}">
+    {% csrf_token %}
+
+    <h3 style="margin-top: 2rem;">Choisir les pièces</h3>
+    <div class="coins-grid">
+      {% for coin in denoms %}
+        <div class="coin" data-value="{{ coin }}">{{ coin }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="card">
+      <h4>Votre nouveau motif</h4>
+      <div id="pattern-display"></div>
+      <p style="font-size: 1.5rem; font-weight: bold;">
+        Total : <span id="pattern-total">0</span> <span id="currency-display">{{ user.currency }}</span>
+      </p>
+    </div>
+
+    <input type="hidden" name="pattern" id="input-pattern" value="">
+    <input type="hidden" name="total" id="input-total" value="">
+
+    <div style="text-align: center; margin-top: 2rem;">
+      <button type="submit" class="btn btn-success btn-lg">Sauvegarder les modifications</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg" style="margin-left: 1rem;">Annuler</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const coins = document.querySelectorAll('.coin');
+  const display = document.getElementById('pattern-display');
+  const totalEl = document.getElementById('pattern-total');
+  const inputPattern = document.getElementById('input-pattern');
+  const inputTotal = document.getElementById('input-total');
+
+  let pattern = [];
+
+  // Pre-fill current pattern
+  const currentPattern = "{{ user.pattern|escapejs }}";
+  if (currentPattern && currentPattern !== "None") {
+    const values = currentPattern.split(',').map(x => parseInt(x)).filter(x => !isNaN(x));
+    pattern = values;
+
+    values.forEach(val => {
+      const coinEl = Array.from(coins).find(c => parseInt(c.dataset.value) === val);
+      if (coinEl) {
+        const clone = coinEl.cloneNode(true);
+        clone.style.width = clone.style.height = '60px';
+        clone.style.fontSize = '0.9rem';
+        clone.style.cursor = 'pointer';
+        clone.onclick = function(e) {
+          e.stopPropagation();
+          const idx = pattern.indexOf(val);
+          if (idx > -1) {
+            pattern.splice(idx, 1);
+            this.remove();
+            update();
+          }
+        };
+        display.appendChild(clone);
+      }
+    });
+    update();
+  }
+
+  function update() {
+    const total = pattern.reduce((a,b) => a + b, 0);
+    totalEl.textContent = total;
+    inputPattern.value = pattern.join(',');
+    inputTotal.value = total;
+  }
+
+  coins.forEach(coin => {
+    coin.addEventListener('click', () => {
+      const value = parseInt(coin.dataset.value);
+      pattern.push(value);
+
+      const clone = coin.cloneNode(true);
+      clone.style.width = clone.style.height = '60px';
+      clone.style.fontSize = '0.9rem';
+      clone.style.cursor = 'pointer';
+      clone.onclick = function(e) {
+        e.stopPropagation();
+        const idx = pattern.indexOf(value);
+        if (idx > -1) {
+          pattern.splice(idx, 1);
+          this.remove();
+          update();
+        }
+      };
+
+      display.appendChild(clone);
+      update();
+    });
+  });
+</script>
+{% endblock %}
