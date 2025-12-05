@@ -74,14 +74,20 @@ def edit_pattern_view(request):
         "denoms": DENOMS
     })
 def dashboard_view(request):
-    username = request.session.get("username") 
-
+    username = request.session.get("username")
     if not username:
-        return redirect("login")  
+        return redirect("login")
 
     try:
         user = UserProfile.objects.get(username=username)
-        user.pattern_list = [int(x) for x in user.pattern.split(",") if x.isdigit()]
+        # s'assurer que pattern_list est une liste d'entiers
+        if user.pattern:
+            user.pattern_list = [int(x) for x in user.pattern.split(",") if x.isdigit()]
+        else:
+            user.pattern_list = []
+        # valeurs par défaut
+        user.total = user.total if hasattr(user, 'total') else 0
+        user.currency = user.currency if hasattr(user, 'currency') else "MRU"
     except UserProfile.DoesNotExist:
         request.session.pop("username", None)
         return redirect("login")

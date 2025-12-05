@@ -237,7 +237,6 @@
 
         <h3>Votre motif enregistré</h3>
         <div class="pattern-container" id="pattern-container">
-          <!-- Pattern will be populated by JavaScript -->
         </div>
 
         <p class="total-display">
@@ -245,8 +244,8 @@
         </p>
 
         <div class="btn-group">
-          <a href="/edit-pattern" class="btn btn-success">Éditer mon motif</a>
-          <a href="/logout" class="btn btn-primary">Se déconnecter</a>
+          <a href="{% url 'edit_pattern' %}" class="btn btn-success">Éditer mon motif</a>
+          <a href="{% url 'logout' %}" class="btn btn-primary" id="logout-btn">Se déconnecter</a>
         </div>
       </div>
 
@@ -254,58 +253,58 @@
       <div id="not-authenticated-view" style="display: none;">
         <h1>Non connecté</h1>
         <p>Vous devez vous connecter avec votre motif de pièces.</p>
-        <a href="/login" class="btn btn-primary">Connexion</a>
+        <a href="#" class="btn btn-primary" id="login-btn">Connexion</a>
       </div>
     </div>
   </div>
 
-  <script>
-    // Sample user data - in Django, this would come from the backend
-    const userData = {
-      isAuthenticated: true,
-      username: "JohnDoe",
-      pattern: [5, 10, 20, 50, 100, 200], // Array of coin values
-      total: 385,
-      currency: "MRU"
-    };
+<!-- insérer avant ton script JS -->
+{{ user.pattern_list|default:"[]"|json_script:"pattern-list" }}
 
-    function renderDashboard() {
-      const authenticatedView = document.getElementById('authenticated-view');
-      const notAuthenticatedView = document.getElementById('not-authenticated-view');
-      
-      if (userData.isAuthenticated) {
-        // Show authenticated view
+<script>
+const userData = {
+  isAuthenticated: true,
+  username: "{{ user.username|escapejs }}",
+  pattern: JSON.parse(document.getElementById('pattern-list').textContent),
+  total: Number("{{ user.total|default:'0' }}"),
+  currency: "{{ user.currency|default:'MRU'|escapejs }}"
+};
+
+function renderDashboard() {
+    const authenticatedView = document.getElementById('authenticated-view');
+    const notAuthenticatedView = document.getElementById('not-authenticated-view');
+    const patternContainer = document.getElementById('pattern-container');
+
+    if (userData.isAuthenticated) {
         authenticatedView.style.display = 'block';
         notAuthenticatedView.style.display = 'none';
 
-        // Populate user data
-        document.getElementById('username').textContent = userData.username;
-        document.getElementById('total').textContent = userData.total;
-        document.getElementById('currency').textContent = userData.currency;
+        document.getElementById('username').textContent = userData.username || "Utilisateur";
+        document.getElementById('total').textContent = userData.total || 0;
+        document.getElementById('currency').textContent = userData.currency || "MRU";
 
-        // Render pattern
-        const patternContainer = document.getElementById('pattern-container');
         patternContainer.innerHTML = '';
 
-        if (userData.pattern && userData.pattern.length > 0) {
-          userData.pattern.forEach(coinValue => {
-            const coin = document.createElement('div');
-            coin.className = 'coin';
-            coin.textContent = coinValue;
-            patternContainer.appendChild(coin);
-          });
+        if (Array.isArray(userData.pattern) && userData.pattern.length > 0) {
+            userData.pattern.forEach(value => {
+                const coin = document.createElement('div');
+                coin.className = 'coin';
+                coin.textContent = value;
+                patternContainer.appendChild(coin);
+            });
         } else {
-          patternContainer.innerHTML = '<p class="empty-pattern">Aucun motif enregistré</p>';
+            patternContainer.innerHTML = '<p class="empty-pattern">Aucun motif enregistré</p>';
         }
-      } else {
-        // Show not authenticated view
+
+    } else {
         authenticatedView.style.display = 'none';
         notAuthenticatedView.style.display = 'block';
-      }
     }
+}
 
-    // Initialize dashboard
-    renderDashboard();
-  </script>
+renderDashboard();
+</script>
+
+
 </body>
 </html>

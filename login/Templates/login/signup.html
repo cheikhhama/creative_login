@@ -270,6 +270,7 @@
       <h2>Créer votre compte</h2>
 
       <form method="post" id="signup-form">
+        {% csrf_token %}
         <input type="text" name="username" placeholder="Nom d'utilisateur" class="form-control" required>
         
         <select name="currency" class="form-control">
