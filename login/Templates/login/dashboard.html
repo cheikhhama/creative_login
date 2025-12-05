@@ -1,38 +1,310 @@
-{% extends 'login/base.html' %}
-{% block title %}Tableau de bord - {{ user.username }}{% endblock %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de bord - CoinPattern</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-{% block content %}
-<div class="card text-center">
-  {% if user %}
-    <h1>Bonjour à nouveau, {{ user.username }} !</h1>
-    <p>Votre compte est protégé par votre motif de pièces unique.</p>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
 
-    <h3>Votre motif enregistré</h3>
-    <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:15px;margin:2rem 0;">
-      {% for coin in user.pattern_list %}
-        <div class="coin" style="width:90px;height:90px;font-size:1.3rem;">{{ coin }}</div>
-      {% empty %}
-        <p>Aucun motif enregistré</p>
-      {% endfor %}
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    h3 {
+      color: #333;
+      font-size: 1.5rem;
+      margin: 2rem 0 1rem 0;
+      font-weight: 600;
+    }
+
+    p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .pattern-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f9fafb;
+      border-radius: 15px;
+    }
+
+    .coin {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #78350f;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      user-select: none;
+    }
+
+    .total-display {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #333;
+      margin: 2rem 0;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(-1px);
+    }
+
+    .empty-pattern {
+      color: #999;
+      font-style: italic;
+      padding: 2rem;
+    }
+
+    .welcome-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem 0.5rem;
+      }
+
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h3 {
+        font-size: 1.25rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      .pattern-container {
+        gap: 0.5rem;
+        padding: 1rem;
+      }
+
+      .coin {
+        width: 50px;
+        height: 50px;
+        font-size: 0.9rem;
+      }
+
+      .total-display {
+        font-size: 1.5rem;
+      }
+
+      .btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+      }
+
+      .btn-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 1.5rem 1rem;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .welcome-icon {
+        font-size: 2.5rem;
+      }
+
+      .coin {
+        width: 45px;
+        height: 45px;
+        font-size: 0.85rem;
+      }
+
+      .total-display {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <!-- Authenticated User View -->
+      <div id="authenticated-view">
+        <div class="welcome-icon">👋</div>
+        <h1>Bonjour à nouveau, <span id="username">Utilisateur</span> !</h1>
+        <p>Votre compte est protégé par votre motif de pièces unique.</p>
+
+        <h3>Votre motif enregistré</h3>
+        <div class="pattern-container" id="pattern-container">
+        </div>
+
+        <p class="total-display">
+          Total : <span id="total">0</span> <span id="currency">MRU</span>
+        </p>
+
+        <div class="btn-group">
+          <a href="{% url 'edit_pattern' %}" class="btn btn-success">Éditer mon motif</a>
+          <a href="{% url 'logout' %}" class="btn btn-primary" id="logout-btn">Se déconnecter</a>
+        </div>
+      </div>
+
+      <!-- Not Authenticated View (hidden by default) -->
+      <div id="not-authenticated-view" style="display: none;">
+        <h1>Non connecté</h1>
+        <p>Vous devez vous connecter avec votre motif de pièces.</p>
+        <a href="#" class="btn btn-primary" id="login-btn">Connexion</a>
+      </div>
     </div>
+  </div>
 
-    <p style="font-size:1.8rem;font-weight:bold;">
-      Total : {{ user.total }} {{ user.currency }}
-    </p>
+<!-- insérer avant ton script JS -->
+{{ user.pattern_list|default:"[]"|json_script:"pattern-list" }}
 
-    <div style="margin: 2rem 0; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-      <a href="{% url 'edit_pattern' %}" class="btn btn-success btn-lg">
-        Éditer mon motif
-      </a>
-      <a href="{% url 'logout' %}" class="btn btn-primary btn-lg">
-        Se déconnecter
-      </a>
-    </div>
+<script>
+const userData = {
+  isAuthenticated: true,
+  username: "{{ user.username|escapejs }}",
+  pattern: JSON.parse(document.getElementById('pattern-list').textContent),
+  total: Number("{{ user.total|default:'0' }}"),
+  currency: "{{ user.currency|default:'MRU'|escapejs }}"
+};
 
-  {% else %}
-    <h1>Non connecté</h1>
-    <p>Vous devez vous connecter avec votre motif de pièces.</p>
-    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Connexion</a>
-  {% endif %}
-</div>
-{% endblock %}
+function renderDashboard() {
+    const authenticatedView = document.getElementById('authenticated-view');
+    const notAuthenticatedView = document.getElementById('not-authenticated-view');
+    const patternContainer = document.getElementById('pattern-container');
+
+    if (userData.isAuthenticated) {
+        authenticatedView.style.display = 'block';
+        notAuthenticatedView.style.display = 'none';
+
+        document.getElementById('username').textContent = userData.username || "Utilisateur";
+        document.getElementById('total').textContent = userData.total || 0;
+        document.getElementById('currency').textContent = userData.currency || "MRU";
+
+        patternContainer.innerHTML = '';
+
+        if (Array.isArray(userData.pattern) && userData.pattern.length > 0) {
+            userData.pattern.forEach(value => {
+                const coin = document.createElement('div');
+                coin.className = 'coin';
+                coin.textContent = value;
+                patternContainer.appendChild(coin);
+            });
+        } else {
+            patternContainer.innerHTML = '<p class="empty-pattern">Aucun motif enregistré</p>';
+        }
+
+    } else {
+        authenticatedView.style.display = 'none';
+        notAuthenticatedView.style.display = 'block';
+    }
+}
+
+renderDashboard();
+</script>
+
+
+</body>
+</html>

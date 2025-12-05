@@ -1,81 +1,137 @@
-<!-- login.html -->
-{% extends 'login/base.html' %}
-{% block title %}Connexion - CoinPattern{% endblock %}
+<!DOCTYPE html>
 
-{% block content %}
-<div class="card">
-  <h2>Connectez-vous avec votre motif de pièces</h2>
-
-  {% if error %}
-    <p style="color: #ef4444; font-weight: 500;">{{ error }}</p>
-  {% endif %}
-
-  <div class="coins-grid">
-    {% for coin in denoms %}
-      <div class="coin" data-value="{{ coin }}">{{ coin }}</div>
-    {% endfor %}
-  </div>
-
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - CoinPattern</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem 1rem; }
+    .container { max-width:800px; width:100%; }
+    .card { background: rgba(255,255,255,0.95); border-radius:20px; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,0.3); backdrop-filter: blur(10px); margin-bottom:1.5rem; text-align:center; }
+    h2 { color:#333; font-size:2rem; margin-bottom:1.5rem; font-weight:700; }
+    h4 { color:#333; font-size:1.25rem; margin-bottom:1rem; font-weight:600; }
+    .error-message { color:#ef4444; font-weight:500; padding:1rem; background:#fee2e2; border-radius:10px; margin-bottom:1rem; }
+    .coins-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(50px,1fr)); gap:0.6rem; margin:1rem 0; }
+    .coin { aspect-ratio:1; background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700; color:#78350f; cursor:pointer; transition: all 0.3s ease; box-shadow:0 4px 10px rgba(0,0,0,0.2); user-select:none; }
+    .coin:hover { transform:translateY(-5px) scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,0.3); }
+    .coin:active { transform:translateY(-2px) scale(1.02); }
+    #pattern-display { display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:center; min-height:80px; padding:1rem; background:#f9fafb; border-radius:10px; margin-bottom:1rem; }
+    #pattern-display .coin { width:40px; height:40px; font-size:0.75rem; }
+    .total-display { margin:1rem 0; font-size:1.5rem; font-weight:bold; color:#333; }
+    .total-display small { font-size:1rem; color:#666; }
+    .btn { padding:1rem 2rem; font-size:1.1rem; border:none; border-radius:50px; cursor:pointer; font-weight:600; transition: all 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,0.2); width:100%; margin-top:1rem; }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; }
+    .btn:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+    .btn:active { transform:translateY(-1px); }
+  </style>
+</head>
+<body>
+<div class="container">
   <div class="card">
-    <h4>Votre motif</h4>
-    <div id="pattern-display"></div>
-    <p style="margin: 1rem 0; font-size: 1.5rem; font-weight: bold;">
-      Total : <span id="pattern-total">0</span> <small id="currency-display">MRU</small>
-    </p>
-  </div>
+    <h2>Connectez-vous avec votre motif de pièces</h2>
 
-  <form id="login-form" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="pattern" id="input-pattern">
-    <input type="hidden" name="total" id="input-total">
-    <button type="submit" class="btn btn-primary btn-lg">Se connecter</button>
-  </form>
+<!-- Django error message -->
+{% if error %}
+<div class="error-message">{{ error }}</div>
+{% endif %}
+
+<!-- JS error container -->
+<div id="error-container"></div>
+
+<div class="coins-grid" id="coins-grid"></div>
+
+<div class="card" style="background:#f9fafb; padding:1.5rem;">
+  <h4>Votre motif</h4>
+  <div id="pattern-display"></div>
+  <p class="total-display">
+    Total : <span id="pattern-total">0</span> <small id="currency-display">MRU</small>
+  </p>
+  <button type="button" class="btn btn-primary" onclick="resetPattern()">Réinitialiser le motif</button>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<form id="login-form" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="pattern" id="input-pattern">
+  <input type="hidden" name="total" id="input-total">
+  <button type="submit" class="btn btn-primary">Se connecter</button>
+  <a href="{% url 'signup' %}" class="btn btn-primary" style="display:inline-block; text-decoration:none; text-align:center;">
+  S'inscrire
+</a>
+</form>
+
+  </div>
+</div>
+
 <script>
-  const coins = document.querySelectorAll('.coin');
+  const denominations = [5,10,20,50,100,200];
+  const coinsGrid = document.getElementById('coins-grid');
   const display = document.getElementById('pattern-display');
   const totalEl = document.getElementById('pattern-total');
   const inputPattern = document.getElementById('input-pattern');
   const inputTotal = document.getElementById('input-total');
+  const form = document.getElementById('login-form');
+  const errorContainer = document.getElementById('error-container');
 
   let pattern = [];
 
-  // Function to update total and hidden inputs
-  function updatePattern() {
-    const total = pattern.reduce((a, b) => a + b, 0);
-    totalEl.textContent = total;
-    inputPattern.value = pattern.join(',');
-    inputTotal.value = total;
+  function renderCoins(){
+    coinsGrid.innerHTML='';
+    denominations.forEach(value=>{
+      const coin=document.createElement('div');
+      coin.className='coin';
+      coin.textContent=value;
+      coin.dataset.value=value;
+      coin.addEventListener('click',()=>addCoin(value));
+      coinsGrid.appendChild(coin);
+    });
   }
 
-  coins.forEach(coin => {
-    coin.addEventListener('click', () => {
-      const value = parseInt(coin.dataset.value);
-
-      // Add coin
-      pattern.push(value);
-
-      const clone = coin.cloneNode(true);
-      clone.style.width = '60px';
-      clone.style.height = '60px';
-      clone.style.fontSize = '0.9rem';
-      clone.style.cursor = 'pointer';
-
-      // Click on clone removes it
-      clone.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const index = Array.from(display.children).indexOf(this);
-        pattern.splice(index, 1);
-        this.remove();
-        updatePattern();
-      });
-
-      display.appendChild(clone);
-      updatePattern();
+  function addCoin(value){
+    pattern.push(value);
+    const coin=document.createElement('div');
+    coin.className='coin';
+    coin.textContent=value;
+    coin.addEventListener('click',function(e){
+      e.stopPropagation();
+      const index=Array.from(display.children).indexOf(this);
+      if(index>-1){ pattern.splice(index,1); this.remove(); updatePattern(); }
     });
+    display.appendChild(coin);
+    updatePattern();
+  }
+
+  function updatePattern(){
+    const total=pattern.reduce((a,b)=>a+b,0);
+    totalEl.textContent=total;
+    inputPattern.value=pattern.join(',');
+    inputTotal.value=total;
+  }
+
+  function resetPattern(){
+    pattern=[];
+    display.innerHTML='';
+    updatePattern();
+    errorContainer.innerHTML='';
+  }
+
+  function showError(message){
+    errorContainer.innerHTML=`<div class="error-message">${message}</div>`;
+  }
+
+  form.addEventListener('submit', e=>{
+    if(pattern.length===0){
+      e.preventDefault();
+      showError('Veuillez sélectionner au moins une pièce pour créer votre motif.');
+    } else {
+      updatePattern();
+    }
   });
+
+  renderCoins();
+  updatePattern();
 </script>
-{% endblock %}
+
+</body>
+</html>
