@@ -1,0 +1,76 @@
+{% extends 'login/base.html' %}
+{% block title %}Sign Up - CoinPattern{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Create Your Account</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="text" name="username" placeholder="Username" class="form-control" required>
+    <select name="currency" class="form-control">
+      <option value="USD">USD ($)</option>
+      <option value="EUR">EUR (€)</option>
+      <option value="MRU">MRU (UM)</option>
+      <option value="XOF">XOF (CFA)</option>
+    </select>
+
+    <h3 style="margin-top: 2rem;">Build Your Secret Pattern</h3>
+    <p>Click coins in the exact order you want to remember.</p>
+
+    <div class="coins-grid">
+      {% for coin in denoms %}
+        <div class="coin" data-value="{{ coin }}">{{ coin }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="card">
+      <h4>Your Pattern</h4>
+      <div id="pattern-display"></div>
+      <p style="font-size: 1.5rem; font-weight: bold;">
+        Total: <span id="pattern-total">0</span> <span id="currency-display">MRU</span>
+      </p>
+    </div>
+
+    <input type="hidden" name="pattern" id="input-pattern">
+    <input type="hidden" name="total" id="input-total">
+
+    <button type="submit" class="btn btn-success btn-lg">Create Account</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Same JS as login.html but with currency sync
+  const script = document.createElement('script');
+  script.text = document.querySelector('#login-form ~ script')?.text || `
+    const coins = document.querySelectorAll('.coin');
+    const display = document.getElementById('pattern-display');
+    const totalEl = document.getElementById('pattern-total');
+    const inputPattern = document.getElementById('input-pattern');
+    const inputTotal = document.getElementById('input-total');
+    const currencyEl = document.getElementById('currency-display');
+    let pattern = [];
+
+    document.querySelector('[name="currency"]').addEventListener('change', (e) => {
+      currencyEl.textContent = e.target.value;
+    });
+
+    coins.forEach(coin => {
+      coin.addEventListener('click', () => {
+        const value = parseInt(coin.dataset.value);
+        pattern.push(value);
+        const clone = coin.cloneNode(true);
+        clone.style.width = clone.style.height = '60px';
+        display.appendChild(clone);
+        const total = pattern.reduce((a,b)=>a+b,0);
+        totalEl.textContent = total;
+        inputPattern.value = pattern.join(',');
+        inputTotal.value = total;
+      });
+    });
+  `;
+  document.body.appendChild(script);
+</script>
+{% endblock %}

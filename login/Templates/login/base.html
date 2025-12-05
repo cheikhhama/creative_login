@@ -1,0 +1,148 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CoinPattern Auth{% endblock %}</title>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #5e7aff;
+      --dark: #1e293b;
+      --gray: #64748b;
+      --light: #f8fafc;
+      --border: #e2e8f0;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #334155;
+      line-height: 1.6;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+    header {
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 0;
+    }
+    .brand {
+      font-size: 1.5rem; font-weight: 700; color: var(--primary);
+    }
+    .nav-links a {
+      margin-left: 1.5rem; color: var(--gray); text-decoration: none; font-weight: 500;
+    }
+    .nav-links a:hover { color: var(--primary); }
+    main { padding: 3rem 0; min-height: 80vh; }
+    footer {
+      text-align: center; padding: 2rem 0; color: #94a3b8; font-size: 0.9rem;
+      border-top: 1px solid var(--border); margin-top: 4rem;
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+    .card h1, .card h2 { color: var(--dark); margin-top: 0; }
+
+    /* Coins */
+    .coins-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .coin {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #f0f0f0, #ffffff);
+      border: 3px solid #cbd5e1;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .coin:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+      box-shadow: 0 10px 20px rgba(67,97,238,0.2);
+    }
+    .coin:active { transform: scale(0.95); }
+
+    /* Pattern Display */
+    #pattern-display {
+      display: flex; flex-wrap: wrap; gap: 12px; min-height: 100px;
+      padding: 1.5rem; background: #f8fafc; border-radius: 10px; margin: 1.5rem 0;
+      border: 2px dashed #cbd5e1;
+    }
+    #pattern-display:empty::before {
+      content: "Your pattern will appear here..."; color: #94a3b8; font-style: italic;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block; text-align: center;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #0d9c6b; }
+    .btn-lg { padding: 1rem 2rem; font-size: 1.1rem; }
+
+    /* Forms */
+    .form-control {
+      width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 1rem; margin-bottom: 1rem;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67,97,238,0.2); }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .coins-grid { grid-template-columns: repeat(4, 1fr); }
+      .coin { width: 70px; height: 70px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container navbar">
+    <div class="brand">CoinPattern</div>
+    <div class="nav-links">
+      {% if user.is_authenticated %}
+        <span>Hi, {{ user.username }}</span>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <a href="{% url 'logout' %}">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">Sign Up</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  © 2025 CoinPattern Auth — DEFIE Challenge Project
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

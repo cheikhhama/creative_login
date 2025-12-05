@@ -1,0 +1,62 @@
+{% extends 'login/base.html' %}
+{% block title %}Login - CoinPattern{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Login with Your Coin Pattern</h2>
+
+  {% if error %}
+    <p style="color: #ef4444; font-weight: 500;">{{ error }}</p>
+  {% endif %}
+
+  <div class="coins-grid">
+    {% for coin in denoms %}
+      <div class="coin" data-value="{{ coin }}">{{ coin }}</div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h4>Your Pattern</h4>
+    <div id="pattern-display"></div>
+    <p style="margin: 1rem 0; font-size: 1.5rem; font-weight: bold;">
+      Total: <span id="pattern-total">0</span> <small id="currency-display">MRU</small>
+    </p>
+  </div>
+
+  <form id="login-form" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="pattern" id="input-pattern">
+    <input type="hidden" name="total" id="input-total">
+    <button type="submit" class="btn btn-primary btn-lg">Login</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const coins = document.querySelectorAll('.coin');
+  const display = document.getElementById('pattern-display');
+  const totalEl = document.getElementById('pattern-total');
+  const inputPattern = document.getElementById('input-pattern');
+  const inputTotal = document.getElementById('input-total');
+
+  let pattern = [];
+
+  coins.forEach(coin => {
+    coin.addEventListener('click', () => {
+      const value = parseInt(coin.dataset.value);
+      pattern.push(value);
+
+      const clone = coin.cloneNode(true);
+      clone.style.width = '60px'; clone.style.height = '60px';
+      clone.style.fontSize = '0.9rem';
+      display.appendChild(clone);
+
+      const total = pattern.reduce((a,b) => a + b, 0);
+      totalEl.textContent = total;
+      inputPattern.value = pattern.join(',');
+      inputTotal.value = total;
+    });
+  });
+</script>
+{% endblock %}

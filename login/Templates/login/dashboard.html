@@ -1,0 +1,30 @@
+{% extends 'login/base.html' %}
+{% block title %}Dashboard - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="card text-center">
+  {% if user.is_authenticated %}
+    <h1>Welcome back, {{ user.username }}!</h1>
+    <p>Your account is protected by your unique coin pattern.</p>
+
+    <h3>Your Saved Pattern</h3>
+    <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:15px;margin:2rem 0;">
+      {% for coin in user.pattern_list %}
+        <div class="coin" style="width:90px;height:90px;font-size:1.3rem;">{{ coin }}</div>
+      {% empty %}
+        <p>No pattern saved</p>
+      {% endfor %}
+    </div>
+
+    <p style="font-size:1.8rem;font-weight:bold;">
+      Total: {{ user.total }} {{ user.currency }}
+    </p>
+
+    <a href="{% url 'logout' %}" class="btn btn-primary btn-lg">Logout</a>
+  {% else %}
+    <h1>Not Logged In</h1>
+    <p>You need to log in with your coin pattern.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login</a>
+  {% endif %}
+</div>
+{% endblock %}
