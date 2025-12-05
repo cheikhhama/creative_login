@@ -10,16 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
+      
       - name: Checkout repository
         uses: actions/checkout@v3
 
-   
+      #
       - name: Setup Python
-        uses: samkirkland/ftp-deploy-action@v4.3.4
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
 
       - name: Install Django
         run: |
@@ -33,11 +32,12 @@ jobs:
 
       
       - name: Deploy Django App via FTP
-        uses: samkirkland/ftp-deploy-action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@4.5.0
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          server: ${{ secrets.CPANEL_FTP_SERVER }}
+          username: ${{ secrets.CPANEL_FTP_USERNAME }}
+          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
+          protocol: ftp
           local-dir: ./           
           server-dir: /home/${{ secrets.CPANEL_FTP_USER }}/django_app
           exclude: |
@@ -45,13 +45,13 @@ jobs:
             */.pyc
             venv/
 
-      
+      # 
       - name: Deploy Static Files
-        uses: samkirkland/ftp-deploy-action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          server: ${{ secrets.CPANEL_FTP_SERVER }}
+          username: ${{ secrets.CPANEL_FTP_USERNAME }}
+          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
           protocol: ftp
           local-dir: ./static/  
           server-dir: /public_html/static
